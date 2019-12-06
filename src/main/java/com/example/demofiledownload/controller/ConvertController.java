@@ -1,6 +1,6 @@
 package com.example.demofiledownload.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import sun.awt.image.ImageWatched;
-
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.Files;
@@ -31,7 +29,10 @@ public class ConvertController {
     @RequestMapping(value = "/jsonfile")
     public void jsonToExcel(@RequestParam(value = "files") MultipartFile file, HttpServletResponse response) throws IOException, ParseException {
 
-        ObjectMapper objm = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
+
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("student Details");
 
         //write file to particular directory
         Path fileNameAndPath = Paths.get(uploadDirectory, file.getOriginalFilename());
@@ -52,8 +53,7 @@ public class ConvertController {
         Object obj = parser.parse(jsonFile);
         JSONArray jsonDetails = (JSONArray)obj;
         String json = jsonDetails.toString();
-        List<TreeMap> map = objm.readValue(json, List.class);
-//        System.out.println(map);
+        List<TreeMap> map = mapper.readValue(json, List.class);
         Set<String> inside = new HashSet<>();
 
         for(Map em: map){
@@ -67,42 +67,8 @@ public class ConvertController {
             }
             allkeysValue.addAll(inside);
         }
-        System.out.println(allkeysValue);
-
 
         ArrayList<String> list = new ArrayList<>(allkeysValue);
-
-        System.out.println(list);
-
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFSheet sheet = workbook.createSheet("student Details");
-
-//        int rownum = 0;
-//        Row row = sheet.createRow(rownum++);
-//        int cellnum = 0;
-////        Cell cell = row.createCell(cellnum++);
-//        for (int i = 0; i < list.size(); i++){
-//            Cell cell = row.createCell(cellnum++);
-//            cell.setCellValue(list.get(i));
-//        }
-//        cellnum = 0;
-//        int len = list.size();
-//        for(Map em: map){
-//            row = sheet.createRow(rownum++);
-//            cellnum = 0;
-//            for(int i = 0; i < list.size(); i++){
-//                Cell cell = row.createCell(cellnum++);
-//                if (!em.containsKey(list.get(i))){
-//                    cell.setCellValue("");
-//                } else{
-//                    cell.setCellValue(String.valueOf(em.get(list.get(i))));
-//                }
-//            }
-//
-//        }
-
-
-
 
         int rownum = 0;
         Row row = sheet.createRow(rownum++);
@@ -133,7 +99,6 @@ public class ConvertController {
         }
 
 
-
         try {
             // this Writes the workbook gfgcontribute
             FileOutputStream out = new FileOutputStream(new File(String.valueOf(fileNameAndPath.getParent())+"/"+"gfgcontribute.xlsx"));
@@ -146,13 +111,9 @@ public class ConvertController {
         }
 
         Path excelFileNameAndPath = Paths.get(uploadDirectory, "gfgcontribute.xlsx");
-        System.out.println("Excel file");
-        System.out.println(excelFileNameAndPath.getParent());
-        System.out.println(excelFileNameAndPath.getFileName());
+
 
         File excelFile = new File(String.valueOf(excelFileNameAndPath.getParent())+"/"+String.valueOf(excelFileNameAndPath.getFileName()));
-        System.out.println(excelFile.getName());
-        System.out.println(excelFile.getParent());
 
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" +excelFile.getName());
 
@@ -205,10 +166,9 @@ public class ConvertController {
             if (em.get(keys) instanceof LinkedHashMap) {
                 allKeys.remove((Object)keyVal);
                 keyVal = keyVal + "/"+(String) keys;
-                System.out.println(keyVal);
-                flag = false;
                 parse((LinkedHashMap) em.get(keys), allKeys,flag, keyVal);
                 keyVal = keyVal.replaceAll("/"+(String)keys,"");
+                flag = false;
             } else {
                 allKeys.remove((Object)keyVal);
                 allKeys.add(keyVal + "/"+(String) keys);
@@ -217,6 +177,3 @@ public class ConvertController {
     }
 
 }
-//[address/geo/lng, website, address/geo/gp/lat, company/employeeId, address, address/geo/gp/loc, address/geo/suite, address/zipcode,
-//        company/name, address/geo/houseNo, address/geo/lat, address/geo/gp/yoc, address/geo/city, phone, address/geo/pos, name,
-//        company/catchPhrase, company, id, company/bs, address/geo/street, email, username]
