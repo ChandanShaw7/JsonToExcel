@@ -19,12 +19,12 @@ import java.util.*;
 public class CreateExcel {
 
     //Creating excel file from json map data
-    private boolean createExcelFile(Path fileNameAndPath, String uploadDirectory,String fileName, HttpServletResponse response) throws IOException, ParseException {
+    private boolean createExcelFile(Path fileNameAndPath, String fileName) throws IOException, ParseException {
         ParseJson parseJson = new ParseJson();
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet(fileName.replace(".xlsx",""));
 
-        List<TreeMap> JsonMap = parseJson.parseJson(fileNameAndPath);
+        List<TreeMap> JsonMap = parseJson.jsonParse(fileNameAndPath);
         List<String> jsonKeys = parseJson.allKeys(JsonMap);
 
         int rownum = 0;
@@ -54,7 +54,7 @@ public class CreateExcel {
 
         try {
             // this Writes the workbook
-            FileOutputStream out = new FileOutputStream(new File(String.valueOf(fileNameAndPath.getParent()) + "/" + fileName));
+            FileOutputStream out = new FileOutputStream(new File(fileNameAndPath.getParent() + "/" + fileName));
             workbook.write(out);
             out.close();
             System.out.println(fileName+" written successfully on disk.");
@@ -88,7 +88,8 @@ public class CreateExcel {
         String second = new Date(System.currentTimeMillis()).getSeconds() +String.valueOf(random.nextInt());
         String fileName = fileNameAndPath.getFileName().toString();
         fileName = fileName.replace(".json",second+".xlsx");
-        if(createExcelFile(fileNameAndPath,uploadDirectory,fileName, response))
+
+        if(createExcelFile(fileNameAndPath,fileName))
         {
             Path excelFileNameAndPath = Paths.get(uploadDirectory, fileName);
 
