@@ -72,15 +72,30 @@ public class CreateExcel {
             if (ema.get(key) instanceof LinkedHashMap){
                 ema = (LinkedHashMap) ema.get(key);
             }
+            else if(ema.get(key) instanceof List){
+                val = parseValue((List) ema.get(key));
+            }
             else{
                 if(!ema.containsKey((Object)key)){
-                    val = "";
+                    val =  "";
                 }else{
+                    System.out.println(ema.get(key));
                     val = (String) ema.get(key);
                 }
             }
         }
         return val;
+    }
+
+    private String parseValue(List val){
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for(int i = 0; i < val.size();++i){
+            sb.append(val.get(i)+", ");
+        }
+        sb.delete(sb.length()-2,sb.length());
+        sb.append("]");
+        return sb.toString();
     }
 
     public ResponseEntity<Resource> downloadExcelFile(Path fileNameAndPath, String uploadDirectory, HttpServletResponse response) throws IOException, ParseException {

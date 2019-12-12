@@ -45,6 +45,7 @@ public class ParseJson {
                 }
                 allKeysValue.addAll(inside);
             }
+            System.out.println(allKeysValue);
             return new ArrayList<>(allKeysValue);
         }
 
